@@ -1,1 +1,5 @@
 Invoke-WebRequest -Uri "https://github.com/git-for-windows/git/releases/download/v2.35.1.windows.1/Git-2.35.1-64-bit.exe" -OutFile "git-2.35.1-64-bit.exe"
+
+
+
+Invoke-WebRequest -Uri "https://github.com/justfake8291/wsn/raw/main/antenna.pkt" -OutFile "antenna.pkt"
