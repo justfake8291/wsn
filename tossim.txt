@@ -1,0 +1,162 @@
+Practical-3
+
+Aim : Understanding TOSSIM for
+- Mote-mote radio communication
+- Mote-PC serial communication
+Introduction :
+TOSSIM is a discrete event simulator for TinyOS sensor networks. Instead of compiling a TinyOS application for a
+mote, users can compile it into the TOSSIM framework, which runs on a PC. As TOSSIM runs on a PC, this allows
+users to examine their TinyOS code to debug, test, and analyze algorithms in a controlled and repeatable environment.
+a. TOSSIM for Mote-mote radio communication
+TinyOS provides a number of interfaces to abstract the underlying communications services and a number of
+components that provide (implement) these interfaces. All of these interfaces and components use a common message
+buffer abstraction, called message_t, which is implemented as a nesC struct (similar to a C struct).
+The message_t abstraction replaces the TinyOS 1.x TOS_Msg abstraction. Unlike
+TinyOS 1.x, the members of message_t are opaque, and therefore not accessed directly.
+Basic Communications Interfaces
+Following are some of the interfaces and components that use message_t as the underlying data structure:
+ Packet - Provides the basic accessors for the message_t abstract data type:
+ commands for clearing a message's contents
+ getting its payload length
+ getting a pointer to its payload area.
+ Send - Provides the basic address-free message sending interface:
+ commands for sending a message and canceling a pending message send
+ an event to indicate whether a message was sent successfully or not
+ a functions for getting the message's maximum payload
+ a pointer to a message's payload area.
+ Receive - Provides the basic message reception interface:
+ an event for receiving messages
+ commands for getting a message's payload length
+ getting a pointer to a message's payload area.
+ PacketAcknowledgements - Provides a mechanism for requesting acknowledgements on a per-packet basis.
+ RadioTimeStamping - Provides time stamping information for radio transmission and reception.
+Components
+Following are some of the components in the /tos/system directory which provide (implement) those interfaces:.
+ AMReceiverC - Provides the following interfaces: Receive, Packet, and AMPacket.
+ AMSenderC - Provides AMSend, Packet, AMPacket, and PacketAcknowledgements as Acks.
+ AMSnooperC - Provides Receive, Packet, and AMPacket.
+ AMSnoopingReceiverC - Provides Receive, Packet, and AMPacket.
+ ActiveMessageAddressC - Provides commands to get and set the node's active message address.
+This interface is not for general use and changing a node's active message address can break the network stack.
+Compiling TOSSIM
+TOSSIM is a TinyOS library. Its core code lives in tos/lib/tossim. Every TinyOS source directory has an optional sim
+subdirectory, which may contain simulation implementations of that package.
+For example: tos/chips/atm128/timer/sim contains TOSSIM implementations of some of the Atmega128 timer
+abstractions.
+To compile TOSSIM
+pass the sim option to make:
+$ cd apps/Blink
+$ make micaz sim
+Running TOSSIM with Python
+Go into the RadioCountToLeds application and build TOSSIM:
+$ cd tinyos-2.x/apps/RadioCountToLeds
+
+$ make micaz sim
+$ python // start the Python interpreter
+b) TOSSIM for Mote-PC radio communication
+Packet sources and TestSerial
+The basic abstraction for mote-PC communication is a packet source. It’s a communication medium over which an
+application can receive packets from and send packets to a mote.
+Examples of packet sources include serial ports, TCP sockets, and the SerialForwarder tool.
+Most TinyOS communication tools take an optional -comm parameter, which allows you to specify thepacket source as
+a string.
+For example:
+//tells the Listen tool to use the COM1 serial port (on a Windows machine) at the correct speed for a telos mote
+$ java net.tinyos.tools.Listen -comm serial@COM1:telos
+//tells Listen to use the serial port /dev/ttyS0 (on a UNIX machine) at the correct speed for a micaz mote.
+$ java net.tinyos.tools.Listen -comm serial@/dev/ttyS0:micaz
+Steps to test your serial port:
+1. to install the apps/tests/TestSerial application on a mote.
+2. to run the corresponding Java application which communicates with it over the serial port, you have to build
+the TinyOS application.
+$ java TestSerial
+If you get a message like :
+The java class is not found: TestSerial
+it means that you either haven't compiled the Java code (try running make platform again) or you don't have .
+(the current directory) in your Java CLASSPATH.
+you don't have a SerialForwarder running, TestSerial will exit, complaining
+that it can't connect to one. So let's specify the serial port as the source, using the -comm parameter as
+3. You have to specify the SerialForwarder which specifies the packet source, using the -comm parameter
+described as above.
+The syntax for a serial port source is as follows:
+serial@<PORT>:<SPEED>
+4. Specifying a platform name tells the serial packet source to use the default speed for the platform. For Example
+:
+serial@COM1:micaz
+serial@COM1:57600
+5. If you run TestSerial with the proper PORT and SPEED settings, you should see output like this:
+Sending packet 1
+Received packet sequence number 4
+Sending packet 2
+Received packet sequence number 5
+Sending packet 3
+Received packet sequence number 6
+Sending packet 4
+Received packet sequence number 7
+Received packet sequence number 8
+Sending packet 5
+Received packet sequence number 9
+Sending packet 6
+and the mote LEDs will blink.
+MOTECOM
+For communicating with a mote over your serial port, you can just set MOTECOM and no longer have to specify the -
+comm parameter. For example:
+export MOTECOM=serial@COM1:19200 # mica baud rate
+export MOTECOM=serial@COM1:mica # mica baud rate, again
+export MOTECOM=serial@COM2:mica2 # mica2 baud rate on different serial port
+export MOTECOM=serial@COM3:57600 # explicit mica2 baud rate
+
+BaseStation and net.tinyos.tools.Listen
+BaseStation is a basic TinyOS utility application. TinyOS has a toolchain for generating and sending packets to a mote
+over a serial port, Base Station acts as a bridge between the serial port and radio network. When it receives a packet
+from the serial port, it transmits it on the radio; when it receives a packets over the radio, it transmits it to the serial
+port. BaseStation allows PC tools to communicate directly with mote networks.
+BaseStation is receiving your BlinkToRadio packets and sending them to the serial port, so if it is plugged into a PC
+we can view these packets. The Java tool Listen is a basic packet sniffer: it prints out the binary contents of any packet
+it hears. Run Listen, using either MOTECOM or a –comm parameter:
+$ java net.tinyos.tools.Listen
+Listen creates a packet source and just prints out every packet it sees. Your output should look something like this:
+00 FF FF 00 00 04 22 06 00 02 00 01
+00 FF FF 00 00 04 22 06 00 02 00 02
+00 FF FF 00 00 04 22 06 00 02 00 03
+00 FF FF 00 00 04 22 06 00 02 00 04
+00 FF FF 00 00 04 22 06 00 02 00 05
+00 FF FF 00 00 04 22 06 00 02 00 06
+00 FF FF 00 00 04 22 06 00 02 00 07
+00 FF FF 00 00 04 22 06 00 02 00 08
+00 FF FF 00 00 04 22 06 00 02 00 09
+00 FF FF 00 00 04 22 06 00 02 00 0A
+00 FF FF 00 00 04 22 06 00 02 00 0B
+Listen is simply printing out the packets that are coming from the mote. Each data packet that comes out of the mote
+contains several fields of data.
+- The first byte (00) indicates that this is an AM packet.
+- The next fields are the generic Active Message fields, defined in tinyos-
+- 2.x/tos/lib/serial/Serial.h.
+- Finally, the remaining fields are the data payload of the message, which was defined in BlinkToRadio.h as:
+typedef nx_struct BlinkToRadioMsg {
+nx_uint16_t nodeid;
+nx_uint16_t counter;
+} BlinkToRadioMsg;
+
+The overall message format for the BlinkToRadioC application is therefore (ignoring the first 00 byte):
+ Destination address (2 bytes)
+ Link source address (2 bytes)
+ Message length (1 byte)
+ Group ID (1 byte)
+ Active Message handler type (1 byte)
+ Payload (up to 28 bytes):
+ source mote ID (2 bytes)
+ sample counter (2 bytes)
+So we can interpret the data packet as follows:
+dest addr link source addr msg len groupID handlerID source addr counter
+ff ff 00 00 04 22 06 00 02 00 0B
+The link source address and source address field differ in who sets them.
+The serial stack does not set the link source address.
+Blink sets the source address to be the node's ID, which depends on what mote ID you installed your BlinkToRadio
+application with. The default ID is 00 01.
+Note that the data is sent by the mote in big-endian format; for example, 01 02 means 258 (256*1 + 2). This format is
+independent of the endian-ness of the processor, because the packet format is an nx_struct, which is a network format,
+that is, big-endian and byte-aligned.
+Using nx_struct (rather than a standard C struct) for a messagepayload ensures that it will work across platforms.
+As you watch the packets scroll by, you should see the counter field increase as the BlinkToRadio appincrements its
+counter.

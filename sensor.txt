@@ -1,0 +1,42 @@
+Practical – 1
+
+Aim : Understanding the Sensor Node Hardware. (For Eg. Sensors, Nodes (Sensor mote), Base Station,
+Graphical User Interface.)
+1. Components
+A wireless sensor network (WSN) is a hardware and software package that typically consists of four parts -
+transceiver, microcontroller, sensors and power source.
+
+a. ‘Sensors’ connected to each node by a wired connection. In our case, we use sensors that can measure
+soil moisture, electrical conductivity, soil temperature, water pressure, flow rate, or a range of weather
+variables (light, air temperature, wind, humidity, etc.).
+
+Figure 2. One of many sensors that can be connected to a node, this EC-5 sensor (Decagon Devices,
+Inc. Pullman, WA) measures volumetric water content (soil moisture).
+b. ‘Nodes’ collect the data from sensors and transmit that to a ‘base station’ computer using a one way (in
+the case of monitoring) or two-way (in the case of monitoring and control) radio. Nodes can simply
+monitor environmental and soil conditions or can be used to make control decisions. For example, some
+nodes have the capability to control an electric valve, such as an irrigation valve.
+
+Figure 3. This nR5 (Decagon Devices, Inc. Pullman, WA) node is powered off of 5-AA batteries and
+is connected to 5 soil moisture sensors via stereo ports. The nR5 node is also capable of controlling
+irrigation valve(s), based on user-defined settings.
+c. ‘Base Station’ computer connects the system to the internet, so that data collected by the nodes, then
+transmitted to the base station computer, can be viewed anywhere an internet connection is available.
+
+d. ‘Graphical User Interface’ is the web-based software package, that allows the data collected by sensors
+to be viewed. The software is also used to set irrigation parameters.
+
+Figure 4. The graphical user interface above depicts the volumetric water content (soil moisture) as
+horizontal lines and irrigation events and amounts as bars. Notice the increase in soil moisture after each
+irrigation event.
+Not every WSN will have all four components, but to get optimal functionality the systems developed as part
+of this project do.
+A very simple WSN example that many can relate to is that of the wireless environmental monitoring system
+used by the National Weather Service (NWS). You have probably seen these at a local airport or school. In
+this case, sensors measure environmental conditions and send this data to a node that wirelessly transmits the
+data using a cell signal or wireless signal to a base-station computer where NWS employees (and you) can
+view the current temperature (or rainfall/dew point, wind, etc.) via a website or application (‘app’).
+
+Figure 5. Typical environmental monitoring sensors that you would see at a National Weather Service
+(NWS) monitoring station. These same components can be used in a wireless sensor network by a specialty
+crop producer.
